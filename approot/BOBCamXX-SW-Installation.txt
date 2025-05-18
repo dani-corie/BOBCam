@@ -1,0 +1,265 @@
+Installation der Software von BOBCam01 ... 10                             Didi Lamken 16.04.2025
+
+Betriebssystem auf SD-Karte flashen
+
+Auf einem Windows-PC wird mit dem Programm "Rasperry Pi Imager" auf einer 
+Micro-SD das Betriebssystem "Raspberry Pi OS" installiert:
+MODELL WÄHLEN:           Raspberry PI 3
+OS WÄHLEN:               Raspberry Pi OS (32-bit)        # 64-bit funktioniert hier nicht
+SD-KARTE WÄHLEN:         SDHC-Card - 31.9 GB
+
+Passwort für User "pi", Wlan-SSID und Wlan-Password eingeben
+EINSTELLUNGEN BEARBEITEN: Hostname:           BOBCam01
+                          Benutzername:       pi
+                          Passwort:           pi
+                          SSID                WlanBOB1
+                          Passwort:           WlanBOB1
+                          Passwort anzeigen:  anhacken
+                          SPEICHERN
+
+Möchten Sie die vorher festgelegten OS Anpassungen anwenden? JA
+Alle Daten ...    gelöscht. Möchten Sie wirklich fortfahren? JA
+
+Anzeige Schreiben     0 ... 100 %
+        Verifizieren  0 ... 100 %
+
+Betriebssystem auf RasperryPi booten
+------------------------------------
+
+Inbetriebnahme mit Monitor, Tastatur und Maus
+---------------------------------------------
+Die SD-Karte in den Raspberry PI 3B+ stecken
+Camera Module 3 NoIR mit 15 poligen FFC Flachband-Kabel anschliessen 
+Monitor über HDMI-Kabel anschliessen
+Tastatur und Maus an USB anschliessen
+Stromversorgung über MicroUSB-Kabel
+Später funktioniert die Kamera auch ohne Monitor und Tastatur, doch für erste 
+Tests ist es sehr sinnvoll.
+
+Strom ( 5V ) einschalten und Bootvorgang beobachten. Nach einer kleinen Weile
+erscheint die Bedienoberfläche und rechts oben die vom Wlan-Router erhaltene 
+IP-Adresse.
+links oben kommt man über die Himbeere zum Menüpunkt "shutdown", damit kann man
+am besten rebooten.
+Über "Terminal" kommt man zur Kommandozeile, mit der man viele Befehle austesten
+kann, die später von Programmen automatisch ausgeführt werden sollen.
+
+Mit "ifconfig" erhält man alle möglichen Netzwerkeinstellungen
+Mit "ping www.google.de" erreicht man das Internet
+
+rpicam-hello                       Test der Kamera für 5 sec auf Monitor
+rpicam-hello -t 1000               Test der Kamera für 1 sec 
+
+rpicam-jpeg -o test.jpg            Test der Kamera in Datei test.jpg
+
+man kann auch ein kleines Shell-Script erstellen
+
+photomitdatum.sh              erzeugt Photo mit Datum im Dateinamen
+#!/bin/bash
+DATE=$(date +"%Y%m%d-%H%M%S")
+rpicam-still -t 1000 --hdr auto -o test-$DATE.jpg --autofocus-mode manual --lens-position 3.2 -n
+              timeout 1 sec
+                       high dynamic range
+                                  output Datei mit Datum
+                                                    autofocus manual        linse in 25 cm scharf
+                                                                                               no preview 
+
+chmod +x photomitdatum.sh     damit man es ausführen kann
+./photomitdatum.sh            zum ausführen
+test-2025-03-12_201750.jpg    erzeugtes Bild
+
+photoautofocus.sh             erzeugt Bilder mit verschiedenen Schärfeneinstellungen
+photodiffimage.sh             erzeugt zwei Bilder zum Testen von Bilddifferenzen
+
+
+videomitdatum.sh              erzeugt Video mit Datum im Dateinamen
+#!/bin/bash
+DATE=$(date +"%Y%m%d-%H%M%S")
+rpicam-vid    -t 5s  --codec libav -o test-$DATE.mp4   --width 1920 --height 1080 --hdr auto -n  
+               timeout 5 sec
+                       codierungs library
+                                    output Datei mit Datum
+                                                         Auflösung              
+                                                                                    high dynamic range 
+                                                                                               no preview 
+
+
+
+
+Inbetriebnahme über Netzwerk ohne Monitor, Tastatur und Maus
+------------------------------------------------------------
+
+Auf einem Windows-PC eine Powershell öffnen und auf dem RaspberryPi einloggen
+
+PS D:\4-BOBCam\BOBCam01> ssh pi@BOBCam01
+pi@bobcam01's password: pi
+
+Folgende Dateien sollten da sein:
+
+pi@BOBCam01:~ $ ls
+BOBCam01                       Bookshelf  Kameratest  SW-Installation.txt
+BOBCamXX-Bedienung.txt         Desktop    Music       Templates
+BOBCamXX-NextCloudZugang.txt   Documents  Pictures    TestEinPhotoUpload.sh
+BOBCamXX-SW-Installation.txt   Downloads  Public      Videos
+pi@BOBCam01:~ $
+
+Die Dateien mit FileZilla aktualisieren
+---------------------------------------
+
+Im Servermanager den Server BOBCam01  eintragen
+im Reiter Allgemein: Protokoll SFTP - SSH File Transfer Protocol
+                     Server    192.168.3.151
+                     Benutzer  pi
+                     Passwort  pi
+im Reiter Erweitert  Lokales Standard-Verzeichnis:
+                     D:\4-BOBCAM\BOBCam01
+                     Standard-Verzeichnis auf Server:
+                     /home/pi
+                     Synchronisierten Verzeichniswechsel verwenden
+                     Verzeichnisvergleich
+
+
+
+Verzeichnisse
+---------------
+
+              Windows                           Unix
+ 
+Verzeichnis: D:\4-BOBCam\BOBCam01              /home/pi
+
+BOBCam01                        alle Daten und Programme für laufenden Betrieb
+Kameratest                      alle Daten und Programme für Kameratest
+
+BOBCamXX-NextCloudZugang.txt    für NextCloud
+BOBCamXX-SW-Installation.txt    diese Dokumentation
+EinPhotoUpload.sh               ShellScript zum Uploaden von 1 Photo auf NextCloud
+
+
+Verzeichnis: D:\4-BOBCam\BOBCam01\Kameratest
+
+ a-EinPhoto.py       PythonProgramm macht ein Photo                       
+ b-NeoDens.py              testet NeoPixelBeleuchtung     
+ c-NeoDensPhoto.py                                     mit Photo   
+ d-IrEinAus.py             testet IR-Beleuchtung     
+ e-IrDauerPhoto.py         testet IR-Beleuchtung       mit Photo                           
+ f-IrNeoPhotoDiff.py       Bild mit IR, BildDifferenz, evtl. Bild mit NeoPixel    
+ g-NeoPhotoTime.py         Bild alle x Minuten mit NeoPixel     
+
+dd-IrEinAus.py             für fehlerhafte Pinansteuerung
+ee-IrDauerPhoto.py  
+ff-IrNeoPhotoDiff.py   
+gg-NeoPhotoTime.py                       
+
+MoveToAlt.sh          Bash ShellScript  verschiebt PhotoNeu.jpg nach PhotoAlt.jpg                       
+PhotoMitDatum.sh                        erzeugt Photo mit Datum
+PhotoNeu.sh                             erzeugt PhotoNeu.jpg   für BildDifferenz
+
+
+Verzeichnis: D:\4-BOBCam\BOBCam01\BOBCam01
+                                                                                               
+ 2025                      Photos in YYYY/MM/DD/BOBCamXX-YYYYMMDD-hhmmss.jpg                                                                                           
+ a-recorded                aufgenommene Photos                                                                                          
+ b-uploaded                übertragene Photos                                                                      
+ c-logs                    Log-Dateien
+                                                                       
+ 1-PhotoMitDatum.sh        ShellScript macht ein Photo mit Datum im Namen                                                                                              
+ 2-NeoNoIRPhoto.py         PythonScript schaltet IR aus, NeoPixel ein, macht Photo                                           
+ 3-UploadJpg.sh            ShellScript  überträgt auf NextCloud                                  
+ 4-CreateMove.sh           ShellScript  kopiert Photo nach YYYY/MM/DD                                                     
+ 5-PhotoDauer.py           PythonScript macht Photo von x bis y Uhr alle z Minuten und überträgt                                                                                         
+ EinPhotoUpload.sh         ShellScript  macht ein Photo und überträgt                                                                                         
+
+
+Software-Installation
+----------------------
+
+Die Kamera benötigt keine spezielle SW-Installation, alle Funktionen sollten im Standard-OS
+enthalten sein.
+
+Für die NeoPixelLeds benötigt man eine Library von Adafruit
+   sudo apt-get update
+   sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel  --break-system-packages
+
+Für die Differenz der Images benötigt man folgende Library
+   pip install diffimg --break-system-packages
+
+
+
+Software-Update  18.4.2025
+--------------------------
+
+Verzeichnis: D:\4-BOBCam\BOBCam01
+
+  BOBCamXX                       alle Daten und Programme für laufenden Betrieb
+  Kameratest                     alle Daten und Programme für Kameratest
+
+  BOBCamXX-NextCloudZugang.txt   für NextCloud
+  BOBCamXX-SW-Installation.txt   diese Dokumentation
+
+  GePhotoUpload.sh               ShellScript zum Uploaden von 1 Photo auf NextCloud  gelbes   Licht
+  IrPhotoUpload.sh               ShellScript zum Uploaden von 1 Photo auf NextCloud  Infrarot Licht
+
+
+Verzeichnis: D:\4-BOBCam\BOBCam01\BOBCamXX
+
+  2025                      Photo-Archiv in YYYY/MM/DD/BOBCamXX-YYYYMMDD-hhmmss.jpg                                                                                           
+  a-recorded                aufgenommene Photos                                                                                          
+  b-uploaded                übertragene Photos                                                                      
+  c-logs                    Log-Dateien
+                                                                       
+  1-NoNeoIrPhoto.py         PythonScript NeoPixel aus, IR ein,  macht Photo                                                                                               
+  2-NeoNoIrPhoto.py                      NeoPixel ein, IR aus,  macht Photo                                           
+  3-UploadJpg.sh            ShellScript  überträgt auf NextCloud                                  
+  4-CreateMove.sh                        archiviert Photo in YYYY/MM/DD       
+  GePhotoUpload.sh                       macht ein Photo mit gelben   Licht und überträgt  
+  IrPhotoUpload.sh                       macht ein Photo mit Infrarot Licht und überträgt  
+
+Die ShellScripte müssen lauffähig gemacht werden:
+
+PS D:\4-BOBCam\BOBCam01\BOBCamXX> ssh pi@BOBCam01
+pi@bobcam01's password:
+Linux BOBCam01 ....
+...
+pi@BOBCam01:~ $
+
+pi@BOBCam01:~ $ ls -l                                                  # list directory
+total 36
+drwxr-xr-x 6 pi pi 4096 Apr 18 15:08 BOBCamXX
+-rw-r--r-- 1 pi pi  260 Apr 16 12:12 BOBCamXX-NextCloudZugang.txt
+-rw-r--r-- 1 pi pi 8706 Apr 16 23:50 BOBCamXX-SW-Installation.txt
+-rwxr-xr-x 1 pi pi  341 Apr 18 15:45 GePhotoUpload.sh
+-rwxr-xr-x 1 pi pi  337 Apr 18 15:45 IrPhotoUpload.sh
+drwxr-xr-x 2 pi pi 4096 Apr 16 23:50 Kameratest
+
+pi@BOBCam01:~ $ chmod +x *.sh                                          # ausführbar machen
+
+pi@BOBCam01:~ $ cd BOBCamXX/                                           # directory wechseln
+ 
+pi@BOBCam01:~/BOBCamXX $ ls -l                                         # list directory
+total 40
+-rw-r--r-- 1 pi pi 2549 Apr 18 14:45 1-NoNeoIrPhoto.py
+drwxr-xr-x 3 pi pi 4096 Apr 18 14:55 2025
+-rw-r--r-- 1 pi pi 2315 Apr 18 12:57 2-NeoNoIrPhoto.py
+-rwxr-xr-x 1 pi pi 1507 Apr 18 14:54 3-UploadJpg.sh
+-rwxr-xr-x 1 pi pi  511 Apr 18 14:56 4-CreateMove.sh
+drwxr-xr-x 2 pi pi 4096 Apr 18 15:23 a-recorded
+drwxr-xr-x 2 pi pi 4096 Apr 18 15:23 b-uploaded
+drwxr-xr-x 2 pi pi 4096 Apr 18 14:55 c-logs
+-rwxr-xr-x 1 pi pi  341 Apr 18 15:46 GePhotoUpload.sh
+-rwxr-xr-x 1 pi pi  337 Apr 18 15:46 IrPhotoUpload.sh
+
+pi@BOBCam01:~/BOBCamXX $ chmod +x *.sh                                 # ausführbar machen
+
+
+In GePhotoUpload.sh  und IrPhotoUpload.sh müssen  die Kamera und der IR-Modus aktualisiert werden:
+#!/bin/bash
+KAMERA="BOBCam01"  
+MODUS="Invers"
+#MODUS="NonInvers"
+....
+
+
+
+
+
+
