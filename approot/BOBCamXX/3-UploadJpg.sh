@@ -1,7 +1,17 @@
 #!/bin/bash
-     
+        
+#NextCloud Uni-Bremen        TestUpload
+#https://nc.uni-bremen.de/index.php/s/2wLtaTHjS7WqMRt?path=%2FTestUpload
+KAMERA="BOBCamXX" 
 NC_PASSWORD="GDtotEMKZq"
 SHARE="kjSo6p2Mdw4YGty"
+LINK="https://nc.uni-bremen.de/public.php/dav/FILES"
+
+# NextCloud Uni-Bremen     
+# https://nc.uni-bremen.de/index.php/s/nejNiskggRg6djQ?path=%2FBOBCam10
+KAMERA="BOBCam10"
+NC_PASSWORD="6K9JGYxpFX"
+SHARE="78DeHfgg9JrYg2D"
 LINK="https://nc.uni-bremen.de/public.php/dav/FILES"
 
 RECORDED_DIR="a-recorded"

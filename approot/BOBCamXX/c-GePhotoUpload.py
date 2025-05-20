@@ -1,6 +1,6 @@
-#!/usr/bin/python                            # Didi Lamken    18.04.2025
-programmname = "2-NeoNoIrPhoto.py"
-
+#!/usr/bin/python                            # Didi Lamken    10.05.2025
+programmname = "c-GePhotoUpload.py"
+ 
 import datetime
 import time
 from   time import *
@@ -49,7 +49,7 @@ if ( Modus == "NonInvers" ) :
 lt = localtime()
 Datum     = strftime("%d.%m.%Y", lt)
 Uhrzeit   = strftime("%H:%M:%S", lt)
-Timestamp = strftime("-%Y%m%d-%H%M%S", lt)
+Timestamp = strftime("%Y%m%d-%H%M%S", lt)
 print("   Photo am  ", Datum, "um", Uhrzeit, "Uhr mit Timestamp:", Timestamp )
 
 #density = 100                                                                #### Neopixel ein
@@ -57,9 +57,21 @@ print("   Licht:     gelb mit density:", density )
 pixels.fill((density, density, 0 ))   
 pixels.show()
 
-Photoshell = "libcamera-still -t 1000 -n -o " + Directory + Kamera + Timestamp
-Photoshell = Photoshell + ".jpg --hdr auto --autofocus-mode manual --lens-position 3.2 --width 1500"
+Photoshell = "libcamera-still -t 1000 -n -o " + Directory + Kamera + "-" + Timestamp
+Photoshell = Photoshell + "ge.jpg --hdr auto --autofocus-mode manual --lens-position 3.2 --width 1500"
 os.system(Photoshell)
 
 pixels.fill(( 0, 0, 0 ))   # Licht aus
 pixels.show()
+
+print(" ")
+print("   Upload auf NextCloud")
+ShellCommand = "/home/pi/BOBCamXX/3-UploadJpg.sh"
+os.system(ShellCommand)
+
+print(" ")
+print("   Photo ins Archiv verschieben")
+ShellCommand = "/home/pi/BOBCamXX/4-CreateMove.sh"
+os.system(ShellCommand)
+
+

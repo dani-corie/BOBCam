@@ -12,7 +12,7 @@ Stundemin  =  8         # Bilder   ab   x Uhr
 Stundemax  = 23         # Bilder   bis  x Uhr 
 mindif     =  1         # ein Bild alle x min  machen
     
-cntmax     =  4         # Anzahl der Durchläufe
+cntmax     =  3         # Anzahl der Durchläufe
 
 import os 
 
